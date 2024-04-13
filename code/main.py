@@ -15,13 +15,24 @@ def process_image(img,face_detection):
             bbox = location_data.relative_bounding_box
 
             x1, y1, w, h = bbox.xmin, bbox.ymin, bbox.width, bbox.height
+
+            #print(x1,y1,w,h)    //testing relative coordinates
             x1 = int(x1 * W)
             y1 = int(y1 * H)
             w = int(w * W)
             h = int(h * H)
+            # x2 = int(x1+w)
+            # y2 = int(y1+h)
             # img = cv2.rectangle(img,(x1,y1),(x1+w,y1+h),(0,255,0),5)
+            x1 = max(0,x1)
+            y1 = max(0,y1)
+            x2 = min(W,x1+w)
+            y2 = min(H,y1+h)
 
-            img[y1:y1 + h, x1:x1 + w, :] = cv2.blur(img[y1:y1 + h, x1:x1 + w, :], (40, 40))
+            #print(x1,y1,x2,y2)  //testing actual coordinates
+
+            if x2>x1 and y2>y1:
+                img[y1:y2, x1:x2, :] = cv2.blur(img[y1:y2, x1:x2, :], (40, 40))
     return img
 
 
@@ -64,7 +75,9 @@ with face_detected.FaceDetection(model_selection=0,min_detection_confidence = 0.
         while ret:
             frame = process_image(frame, face_detection)
             cv2.imshow('frame',frame)
-            cv2.waitKey(25)
+            keyy = cv2.waitKey(25)
+            if(keyy==ord('q')):
+                break
             ret, frame = livestream.read()
 
         livestream.release()
